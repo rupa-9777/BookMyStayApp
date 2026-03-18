@@ -1,43 +1,29 @@
-abstract class Room {
+import java.util.HashMap;
 
-    String type;
-    int beds;
-    int size;
-    double price;
+class RoomInventory {
 
-    Room(String type, int beds, int size, double price) {
-        this.type = type;
-        this.beds = beds;
-        this.size = size;
-        this.price = price;
+    private HashMap<String, Integer> inventory;
+
+    RoomInventory() {
+        inventory = new HashMap<>();
+        inventory.put("Single Room", 5);
+        inventory.put("Double Room", 3);
+        inventory.put("Suite Room", 2);
     }
 
-    void displayRoom() {
-        System.out.println("Room Type: " + type);
-        System.out.println("Beds: " + beds);
-        System.out.println("Size: " + size + " sq.ft");
-        System.out.println("Price per night: " + price);
+    int getAvailability(String roomType) {
+        return inventory.getOrDefault(roomType, 0);
     }
-}
 
-class SingleRoom extends Room {
-
-    SingleRoom() {
-        super("Single Room", 1, 200, 2000);
+    void updateAvailability(String roomType, int count) {
+        inventory.put(roomType, count);
     }
-}
 
-class DoubleRoom extends Room {
-
-    DoubleRoom() {
-        super("Double Room", 2, 350, 3500);
-    }
-}
-
-class SuiteRoom extends Room {
-
-    SuiteRoom() {
-        super("Suite Room", 3, 600, 7000);
+    void displayInventory() {
+        System.out.println("Current Room Inventory:");
+        for (String roomType : inventory.keySet()) {
+            System.out.println(roomType + " -> " + inventory.get(roomType));
+        }
     }
 }
 
@@ -45,28 +31,21 @@ public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        Room single = new SingleRoom();
-        Room doubleRoom = new DoubleRoom();
-        Room suite = new SuiteRoom();
-
-        int singleAvailable = 5;
-        int doubleAvailable = 3;
-        int suiteAvailable = 2;
-
         System.out.println("=================================");
         System.out.println("        Book My Stay App");
-        System.out.println("    Hotel Booking System v2.1");
+        System.out.println("    Hotel Booking System v3.1");
         System.out.println("=================================");
 
-        single.displayRoom();
-        System.out.println("Available: " + singleAvailable);
-        System.out.println();
+        RoomInventory inventory = new RoomInventory();
 
-        doubleRoom.displayRoom();
-        System.out.println("Available: " + doubleAvailable);
-        System.out.println();
+        inventory.displayInventory();
 
-        suite.displayRoom();
-        System.out.println("Available: " + suiteAvailable);
+        System.out.println("\nChecking availability for Single Room:");
+        System.out.println("Available: " + inventory.getAvailability("Single Room"));
+
+        System.out.println("\nUpdating inventory...");
+        inventory.updateAvailability("Single Room", 4);
+
+        inventory.displayInventory();
     }
 }
