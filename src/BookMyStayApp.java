@@ -1,98 +1,56 @@
 import java.util.*;
 
-class Reservation {
+class AddOnService {
+    String name;
+    double cost;
 
-    String guestName;
-    String roomType;
-
-    Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
+    AddOnService(String name, double cost) {
+        this.name = name;
+        this.cost = cost;
     }
 }
 
-class RoomInventory {
+class AddOnServiceManager {
+    private Map<String, List<AddOnService>> reservationServices = new HashMap<>();
 
-    private HashMap<String, Integer> inventory = new HashMap<>();
-
-    RoomInventory() {
-        inventory.put("Single", 2);
-        inventory.put("Double", 1);
-        inventory.put("Suite", 1);
+    public void addService(String reservationId, AddOnService service) {
+        reservationServices.putIfAbsent(reservationId, new ArrayList<>());
+        reservationServices.get(reservationId).add(service);
     }
 
-    int getAvailability(String type) {
-        return inventory.getOrDefault(type, 0);
+    public List<AddOnService> getServices(String reservationId) {
+        return reservationServices.getOrDefault(reservationId, new ArrayList<>());
     }
 
-    void decrement(String type) {
-        inventory.put(type, inventory.get(type) - 1);
-    }
-}
-
-class BookingService {
-
-    private Queue<Reservation> queue = new LinkedList<>();
-    private HashMap<String, Set<String>> allocatedRooms = new HashMap<>();
-    private RoomInventory inventory;
-
-    BookingService(RoomInventory inventory) {
-        this.inventory = inventory;
-    }
-
-    void addRequest(Reservation r) {
-        queue.add(r);
-    }
-
-    void processBookings() {
-
-        System.out.println("Room Allocation Processing");
-
-        while (!queue.isEmpty()) {
-
-            Reservation r = queue.poll();
-
-            if (inventory.getAvailability(r.roomType) > 0) {
-
-                String roomId = generateRoomId(r.roomType);
-
-                allocatedRooms
-                        .computeIfAbsent(r.roomType, k -> new HashSet<>())
-                        .add(roomId);
-
-                inventory.decrement(r.roomType);
-
-                System.out.println(
-                        "Booking confirmed for Guest: "
-                                + r.guestName
-                                + ", Room ID: "
-                                + roomId
-                );
-            }
+    public double calculateTotalCost(String reservationId) {
+        double total = 0;
+        for (AddOnService service : getServices(reservationId)) {
+            total += service.cost;
         }
-    }
-
-    private String generateRoomId(String type) {
-
-        Set<String> set = allocatedRooms.getOrDefault(type, new HashSet<>());
-        int number = set.size() + 1;
-
-        return type + "-" + number;
+        return total;
     }
 }
 
-public class BookMyStayApp {
-
+public class BookMStayApp {
     public static void main(String[] args) {
 
-        RoomInventory inventory = new RoomInventory();
+        AddOnServiceManager manager = new AddOnServiceManager();
+        String reservationId = "R101";
 
-        BookingService service = new BookingService(inventory);
+        manager.addService(reservationId, new AddOnService("Spa Service", 1000));
+        manager.addService(reservationId, new AddOnService("Airport Pickup", 500));
 
-        service.addRequest(new Reservation("Abhi", "Single"));
-        service.addRequest(new Reservation("Subha", "Single"));
-        service.addRequest(new Reservation("Vanmathi", "Suite"));
+        System.out.println("Add-On Service Selection");
 
-        service.processBookings();
+        List<AddOnService> services = manager.getServices(reservationId);
+
+        for (AddOnService s : services) {
+            System.out.println("Selected Service: " + s.name + " - " + (int)s.cost);
+        }
+
+        System.out.println("Reservation ID: " + reservationId);
+
+        double total = manager.calculateTotalCost(reservationId);
+        System.out.println("Total Add-On Cost: " + total);
     }
 }
